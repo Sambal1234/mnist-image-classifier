@@ -1,5 +1,5 @@
 streamlit
 tensorflow
 numpy
-opencv-python==4.5.5.64
-Pillow
+opencv-python-headlless
+#Pillow
