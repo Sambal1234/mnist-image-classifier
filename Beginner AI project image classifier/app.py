@@ -22,7 +22,7 @@ def preprocess_image(image_bytes):
     inverted format that the MNIST model expects/understands
     '''
     # convert byte to PIL image
-    image = Image.open(image_bytes).cinvert('L') # convert to Grayscale ('L')
+    image = Image.open(image_bytes).convert('L') # convert to Grayscale ('L')
 
     # convert PIL image to Numpy array
     img_array = np.array(image)
