@@ -21,30 +21,27 @@ def preprocess_image(image_bytes):
     converts the uploaded/captured image into 28x28 grayscale,
     inverted format that the MNIST model expects/understands
     '''
-    # convert byte to PIL image
-    image = Image.open(image_bytes).convert('L') # convert to Grayscale ('L')
+    # 1. Convert to PIL Image, grayscale, and 28x28
+    image = Image.open(image_bytes).convert('L') 
+    image = image.resize((28, 28)) # Added resize (critical for MNIST)
 
-    # convert PIL image to Numpy array
+    # 2. Convert to Numpy array
     img_array = np.array(image)
 
-    # Normalize the pixel values to the range 0.0 to 1.0
-    img_array = img_array.astype('float32') / 255.0
+    # 3. Normalize to 0.0-1.0 (This is the only normalization needed)
+    normalized_img = img_array.astype('float32') / 255.0
 
-    # Invert Colors (The MNIST model expects a white digit on a black background)
-    # Webcam: Black ink (~0) on White background (~255)
-    # MNIST: White ink (~255) on Black background (~0)
-    # So, we simply subtract the array from 255 to invert the brightness.
-    inverted_array = 255.0 - img_array
+    # 4. Invert Colors (Webcam background is white (1.0), digit is dark (0.0).
+    #    MNIST requires background 0.0, digit 1.0. We invert by subtracting from 1.0)
+    inverted_normalized_img = 1.0 - normalized_img
 
-    # Normalize (scale) pixels to values to be between 0 and 1
-    normalized_array = inverted_array / 255.0
-
-    # Reshape the array to match the model's expected input shape: (1, 28, 28, 1)
-    # (Batch size, height, width, channels)
-    final_input = np.expand_dims(normalized_array, axis = -1)
-    final_input = np.expand_dims(final_input, axis = 0)
-
-    display_digit = (inverted_array/255.0) *255.0
+    # 5. Prepare model input (add batch and channel dimension)
+    # Model input needs an extra channel dimension (1, 28, 28, 1)
+    final_input = np.expand_dims(inverted_normalized_img, axis=-1)
+    final_input = np.expand_dims(final_input, axis=0)
+    
+    # 6. Prepare display output (already normalized, ready for st.image)
+    display_digit = inverted_normalized_img
 
     return final_input, display_digit
 
