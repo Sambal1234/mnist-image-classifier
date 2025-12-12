@@ -18,24 +18,25 @@ except Exception as e:
 # 2 Pre Processing function
 def preprocess_image(image_bytes):
     # 1. Convert to PIL Image, grayscale, and 28x28 (CRITICAL)
-    from PIL import Image
     image = Image.open(image_bytes).convert('L') 
     image = image.resize((28, 28)) 
 
     # 2. Convert to Numpy array and Normalize to 0.0-1.0
-    import numpy as np
     img_array = np.array(image)
     normalized_img = img_array.astype('float32') / 255.0
 
-    # 🛑 FIX: We are skipping explicit inversion for this test.
-    # We will use the non-inverted, normalized array for both display and model input.
-    
+    # 🛑 THE FINAL FIX: Invert Colors
+    # Subtracting the normalized array from 1.0 flips the colors:
+    # 1.0 (White paper) -> 0.0 (Black background)
+    # 0.0 (Black ink) -> 1.0 (White digit)
+    inverted_normalized_img = 1.0 - normalized_img 
+
     # 3. Prepare Model Input: Add batch and channel dimensions (1, 28, 28, 1)
-    final_input = np.expand_dims(normalized_img, axis=-1)
+    final_input = np.expand_dims(inverted_normalized_img, axis=-1)
     final_input = np.expand_dims(final_input, axis=0)
     
-    # 4. Prepare Display Output: Use the non-inverted array for display
-    display_digit = normalized_img 
+    # 4. Prepare Display Output
+    display_digit = inverted_normalized_img
 
     return final_input, display_digit
 
