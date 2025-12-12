@@ -17,30 +17,27 @@ except Exception as e:
 
 # 2 Pre Processing function
 def preprocess_image(image_bytes):
-    '''
-    converts the uploaded/captured image into 28x28 grayscale,
-    inverted format that the MNIST model expects/understands
-    '''
-    # 1. Convert to PIL Image, grayscale, and 28x28
-    image = Image.open(image_bytes).convert('L') 
-    image = image.resize((28, 28)) # Added resize (critical for MNIST)
+    # 1. Convert to PIL Image, grayscale, and 28x28 (CRITICAL)
+    image = Image.open(image_bytes).convert('L')
+    image = image.resize((28, 28)) 
 
     # 2. Convert to Numpy array
     img_array = np.array(image)
 
-    # 3. Normalize to 0.0-1.0 (This is the only normalization needed)
+    # 3. Normalize the original image to 0.0-1.0 range
     normalized_img = img_array.astype('float32') / 255.0
 
-    # 4. Invert Colors (Webcam background is white (1.0), digit is dark (0.0).
-    #    MNIST requires background 0.0, digit 1.0. We invert by subtracting from 1.0)
-    inverted_normalized_img = 1.0 - normalized_img
+    # 4. Invert Colors (CRITICAL for MNIST accuracy)
+    # Background (white/1.0) becomes black (0.0). Digit (black/0.0) becomes white (1.0).
+    inverted_normalized_img = 1.0 - normalized_img 
 
-    # 5. Prepare model input (add batch and channel dimension)
-    # Model input needs an extra channel dimension (1, 28, 28, 1)
+    # 5. Prepare Model Input: Add batch and channel dimensions (1, 28, 28, 1)
+    # The final_input for the model is the inverted, normalized array.
     final_input = np.expand_dims(inverted_normalized_img, axis=-1)
     final_input = np.expand_dims(final_input, axis=0)
     
-    # 6. Prepare display output (already normalized, ready for st.image)
+    # 6. Prepare Display Output: The display variable is the inverted, normalized array.
+    # It is ready for st.image() because it's already 0.0-1.0.
     display_digit = inverted_normalized_img
 
     return final_input, display_digit
