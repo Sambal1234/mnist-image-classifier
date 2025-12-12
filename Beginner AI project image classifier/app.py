@@ -2,7 +2,7 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-import cv2 # for image procesing
+#import cv2 # for image procesing
 
 # 1 configuration
 MODEL_PATH  = 'mnist_model.h5'
@@ -27,23 +27,23 @@ def preprocess_image(image_bytes):
     # convert PIL image to Numpy array
     img_array = np.array(image)
 
-    # Use opencv to insert colors (black on white --> white on black)
-    # The default webcam captures a white/light background with dark writing.
-    # We invert it to match the MNIST training data (white digit on black background)
-    inverted_array = cv2.bitwise_npt(img_array)
-
-    # Resize to 28x28
-    resized_array = cv2.resize(inverted_array, (28,28), interpolation=cv2.INTER_AREA)
+    # Invert Colors (The MNIST model expects a white digit on a black background)
+    # Webcam: Black ink (~0) on White background (~255)
+    # MNIST: White ink (~255) on Black background (~0)
+    # So, we simply subtract the array from 255 to invert the brightness.
+    inverted_array = 255.0 - img_array
 
     # Normalize (scale) pixels to values to be between 0 and 1
-    normalized_array = resized_array.astype('float32') / 255.0
+    normalized_array = inverted_array / 255.0
 
     # Reshape the array to match the model's expected input shape: (1, 28, 28, 1)
     # (Batch size, height, width, channels)
     final_input = np.expand_dims(normalized_array, axis = -1)
     final_input = np.expand_dims(final_input, axis = 0)
 
-    return final_input, resized_array
+    display_digit = (inverted_array/255.0) *255.0
+
+    return final_input, display_digit
 
 # 3 Streamlit main app layout
 st.title("Live webcam MNIST digit classifier")
