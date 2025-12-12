@@ -28,13 +28,16 @@ def preprocess_image(image_bytes):
     img_array = np.array(image)
     normalized_img = img_array.astype('float32') / 255.0
 
-    # 3. Invert Colors (Standard for MNIST)
+    # 3. Invert Colors (CRITICAL for MNIST accuracy)
     inverted_normalized_img = 1.0 - normalized_img 
 
-    # 🛑 FINAL FIX: Prepare Model Input - Flatten to (1, 784)
-    # This is the shape expected by many simple Dense/Sequential Keras models.
-    final_input = inverted_normalized_img.flatten() # Flattens to (784,)
-    final_input = np.expand_dims(final_input, axis=0) # Adds Batch dimension (1, 784)
+    # 🛑 THE FINAL FIX: Prepare Model Input - Reshape to (1, 28, 28)
+    # The error says the model expects (None, 28, 28), so we reshape to (1, 28, 28).
+    # We do NOT include the channel dimension (the '1' at the end).
+    final_input = inverted_normalized_img.reshape(1, 28, 28)
+    
+    # Ensure the data type is float32
+    final_input = final_input.astype('float32')
 
     # 4. Prepare Display Output
     display_digit = inverted_normalized_img
