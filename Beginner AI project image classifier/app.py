@@ -17,6 +17,9 @@ except Exception as e:
 
 # 2 Pre Processing function
 def preprocess_image(image_bytes):
+    from PIL import Image
+    import numpy as np
+    
     # 1. Open, convert to Grayscale ('L'), and resize to 28x28
     image = Image.open(image_bytes).convert('L') 
     image = image.resize((28, 28)) 
@@ -25,14 +28,16 @@ def preprocess_image(image_bytes):
     img_array = np.array(image)
     normalized_img = img_array.astype('float32') / 255.0
 
-    # 🛑 FINAL FIX: NO INVERSION. We use the original camera image format (black digit on white background).
-    
-    # 3. Prepare Model Input: Add batch and channel dimensions (1, 28, 28, 1)
-    final_input = np.expand_dims(normalized_img, axis=-1) # <-- Use NON-INVERTED
-    final_input = np.expand_dims(final_input, axis=0)
-    
+    # 3. Invert Colors (Standard for MNIST)
+    inverted_normalized_img = 1.0 - normalized_img 
+
+    # 🛑 FINAL FIX: Prepare Model Input - Flatten to (1, 784)
+    # This is the shape expected by many simple Dense/Sequential Keras models.
+    final_input = inverted_normalized_img.flatten() # Flattens to (784,)
+    final_input = np.expand_dims(final_input, axis=0) # Adds Batch dimension (1, 784)
+
     # 4. Prepare Display Output
-    display_digit = normalized_img # <-- Use NON-INVERTED
+    display_digit = inverted_normalized_img
 
     return final_input, display_digit
 
