@@ -17,25 +17,30 @@ except Exception as e:
 
 # 2 Pre Processing function
 def preprocess_image(image_bytes):
-    # 1. Convert to PIL Image, grayscale, and 28x28 (CRITICAL)
+    # Imports need to be at the top of app.py, but we ensure they're available
+    from PIL import Image
+    import numpy as np
+    
+    # 1. Open, convert to Grayscale ('L'), and resize to 28x28
     image = Image.open(image_bytes).convert('L') 
     image = image.resize((28, 28)) 
 
-    # 2. Convert to Numpy array and Normalize to 0.0-1.0
+    # 2. Convert to Numpy array
     img_array = np.array(image)
+
+    # 3. Normalize the image to 0.0-1.0 range
     normalized_img = img_array.astype('float32') / 255.0
 
-    # 🛑 THE FINAL FIX: Invert Colors
-    # Subtracting the normalized array from 1.0 flips the colors:
-    # 1.0 (White paper) -> 0.0 (Black background)
-    # 0.0 (Black ink) -> 1.0 (White digit)
+    # 🛑 THE FINAL FIX: Invert Colors (CRITICAL for MNIST accuracy)
+    # Flips White paper (1.0) to Black background (0.0), 
+    # and Black ink (0.0) to White digit (1.0).
     inverted_normalized_img = 1.0 - normalized_img 
 
-    # 3. Prepare Model Input: Add batch and channel dimensions (1, 28, 28, 1)
+    # 4. Prepare Model Input: Add batch and channel dimensions (1, 28, 28, 1)
     final_input = np.expand_dims(inverted_normalized_img, axis=-1)
     final_input = np.expand_dims(final_input, axis=0)
     
-    # 4. Prepare Display Output
+    # 5. Prepare Display Output (ready for st.image)
     display_digit = inverted_normalized_img
 
     return final_input, display_digit
