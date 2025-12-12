@@ -27,6 +27,9 @@ def preprocess_image(image_bytes):
     # convert PIL image to Numpy array
     img_array = np.array(image)
 
+    # Normalize the pixel values to the range 0.0 to 1.0
+    img_array = img_array.astype('float32') / 255.0
+
     # Invert Colors (The MNIST model expects a white digit on a black background)
     # Webcam: Black ink (~0) on White background (~255)
     # MNIST: White ink (~255) on Black background (~0)
