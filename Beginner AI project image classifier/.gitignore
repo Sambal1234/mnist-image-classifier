@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Virtual environment folder (if you use one)
+venv/
+.venv/
+
+# TensorFlow/Keras specific (optional, but often needed)
+# This prevents uploading the large saved model file
+saved_model/
