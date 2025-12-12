@@ -17,9 +17,6 @@ except Exception as e:
 
 # 2 Pre Processing function
 def preprocess_image(image_bytes):
-    from PIL import Image
-    import numpy as np
-    
     # 1. Open, convert to Grayscale ('L'), and resize to 28x28
     image = Image.open(image_bytes).convert('L') 
     image = image.resize((28, 28)) 
@@ -28,19 +25,14 @@ def preprocess_image(image_bytes):
     img_array = np.array(image)
     normalized_img = img_array.astype('float32') / 255.0
 
-    # 3. Invert Colors (CRITICAL for MNIST accuracy)
-    inverted_normalized_img = 1.0 - normalized_img 
-
-    # 🛑 THE FINAL FIX: Prepare Model Input - Reshape to (1, 28, 28)
-    # The error says the model expects (None, 28, 28), so we reshape to (1, 28, 28).
-    # We do NOT include the channel dimension (the '1' at the end).
-    final_input = inverted_normalized_img.reshape(1, 28, 28)
+    # 🛑 FINAL FIX: NO INVERSION. We use the original camera image format (black digit on white background).
     
-    # Ensure the data type is float32
-    final_input = final_input.astype('float32')
-
+    # 3. Prepare Model Input: Add batch and channel dimensions (1, 28, 28, 1)
+    final_input = np.expand_dims(normalized_img, axis=-1) # <-- Use NON-INVERTED
+    final_input = np.expand_dims(final_input, axis=0)
+    
     # 4. Prepare Display Output
-    display_digit = inverted_normalized_img
+    display_digit = normalized_img # <-- Use NON-INVERTED
 
     return final_input, display_digit
 
