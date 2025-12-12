@@ -5,7 +5,7 @@ from PIL import Image
 #import cv2 # for image procesing
 
 # 1 configuration
-MODEL_PATH  = 'mnist_model.h5'
+MODEL_PATH = "Beginner AI project image classifier/mnist_model.h5"
 
 # Load the model outside the main function so it only loads once
 try:
